@@ -89,3 +89,20 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+// For OpSys HW4
+int
+sys_setpriority(void)
+{
+	int newPriority;
+	int oldPriority;
+
+	argint(0, &newPriority);
+	if(newPriority < 0 || newPriority > 200)
+		return proc->priority;
+	oldPriority = proc->priority;
+	proc->priority = newPriority;
+	if(newPriority > oldPriority)
+		yield();
+	return proc->priority;
+}
