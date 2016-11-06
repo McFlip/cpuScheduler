@@ -7,6 +7,8 @@
 #include "proc.h"
 #include "spinlock.h"
 
+extern int sys_setpriority(int);
+
 struct {
   struct spinlock lock;
   struct proc proc[NPROC];
@@ -272,7 +274,7 @@ wait(void)
 void
 scheduler(void)
 {
-  struct proc *p;
+  struct proc *p, *pri;
 
   for(;;){
     // Enable interrupts on this processor.
@@ -283,6 +285,17 @@ scheduler(void)
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state != RUNNABLE)
         continue;
+			int highest = ptable.proc[0].priority;
+			for(pri = &ptable.proc[0]; pri < &ptable.proc[NPROC]; pri++){
+				if(pri->state == RUNNABLE && pri->priority < highest){
+					highest = pri->priority;
+				}
+			}
+			cprintf("highest is: %d \n", highest);  //TODO Delete me
+			cprintf("current proc name is: %s \n", p->name); //TODO Delete me
+			cprintf("current proc priority is: %d \n", p->priority); //TODO Delete me
+			if(p->priority > highest)
+				continue;
 
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
@@ -402,17 +415,22 @@ static void
 wakeup1(void *chan)
 {
   struct proc *p;
+// 	int priority;
 
-  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
-    if(p->state == SLEEPING && p->chan == chan)
-      p->state = RUNNABLE;
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+		if(p->state == SLEEPING && p->chan == chan){
+			p->state = RUNNABLE;
+// 			priority = p->priority - 2;
+// 			sys_setpriority(priority);
+		}
+	}
 }
 
 // Wake up all processes sleeping on chan.
 void
 wakeup(void *chan)
 {
-  acquire(&ptable.lock);
+	acquire(&ptable.lock);
   wakeup1(chan);
   release(&ptable.lock);
 }
