@@ -8,8 +8,6 @@
 #include "traps.h"
 #include "spinlock.h"
 
-extern int sys_setpriority(int);
-
 // Interrupt descriptor table (shared by all CPUs).
 struct gatedesc idt[256];
 extern uint vectors[];  // in vectors.S: array of 256 entry pointers
@@ -38,7 +36,6 @@ idtinit(void)
 void
 trap(struct trapframe *tf)
 {
-// 	int priority;
 	if(tf->trapno == T_SYSCALL){
     if(proc->killed)
       exit();
@@ -106,8 +103,9 @@ trap(struct trapframe *tf)
   // Force process to give up CPU on clock tick.
   // If interrupts were on while locks held, would need to check nlock.
   if(proc && proc->state == RUNNING && tf->trapno == T_IRQ0+IRQ_TIMER){
-// 		priority = proc->priority + 2;
-// 		sys_setpriority(priority);
+		if(proc->priority < 199){
+			proc->priority += 2;
+		}
 		yield();
 	}
 

@@ -7,8 +7,6 @@
 #include "proc.h"
 #include "spinlock.h"
 
-extern int sys_setpriority(int);
-
 struct {
   struct spinlock lock;
   struct proc proc[NPROC];
@@ -415,13 +413,13 @@ static void
 wakeup1(void *chan)
 {
   struct proc *p;
-// 	int priority;
 
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
 		if(p->state == SLEEPING && p->chan == chan){
 			p->state = RUNNABLE;
-// 			priority = p->priority - 2;
-// 			sys_setpriority(priority);
+			if(p->priority > 1){
+				p->priority -= 2;
+			}
 		}
 	}
 }

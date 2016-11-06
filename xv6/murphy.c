@@ -40,7 +40,7 @@ main(int argc, char *argv[])
 		setpriority(49);
 		for (int j = 0; j < 50; j++){
 			printf(1, "This is the parent\n");
-// 			sleep(5);
+			sleep(1);
 		}
 		wait();
 		exit();
