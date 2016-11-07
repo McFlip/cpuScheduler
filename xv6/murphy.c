@@ -31,16 +31,16 @@ main(int argc, char *argv[])
 
 	int p = fork();
 	if(p == 0){
-		setpriority(0);
 		for (int j = 0; j < 50; j++){
+			setpriority(50);
 			printf(1, "baby\n");
 		}
 		exit();
 	} else {
-		setpriority(49);
 		for (int j = 0; j < 50; j++){
+			setpriority(50);
 			printf(1, "This is the parent\n");
-			sleep(1);
+// 			sleep(1);
 		}
 		wait();
 		exit();
