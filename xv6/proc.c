@@ -283,17 +283,16 @@ scheduler(void)
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state != RUNNABLE)
         continue;
+			//**** BEGIN PRIORITY SCHEDULER ****
 			int highest = 200;
 			for(pri = &ptable.proc[0]; pri < &ptable.proc[NPROC]; pri++){
 				if(pri->state == RUNNABLE && pri->priority < highest){
 					highest = pri->priority;
 				}
 			}
-			cprintf("highest is: %d \n", highest);  //TODO Delete me
-			cprintf("current proc name is: %s \n", p->name); //TODO Delete me
-			cprintf("current proc priority is: %d \n", p->priority); //TODO Delete me
 			if(p->priority > highest)
 				continue;
+			//**** END PRIORITY SCHEDULER ****
 
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
@@ -417,6 +416,7 @@ wakeup1(void *chan)
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
 		if(p->state == SLEEPING && p->chan == chan){
 			p->state = RUNNABLE;
+			//AGING for HW4 - increase priority
 			p->priority -= 2;
 			if(p->priority < 0){
 				p->priority = 0;
